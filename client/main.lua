@@ -78,12 +78,44 @@ local function debugPrint(message, payload)
   print(('[mz_target] %s%s'):format(tostring(message or 'debug'), suffix))
 end
 
+local function normalizeNotifyType(notifyType)
+  local key = tostring(notifyType or 'info'):lower()
+
+  if key == 'success' or key == 'error' or key == 'warning' or key == 'info' then
+    return key
+  end
+
+  if key == 'inform' then
+    return 'info'
+  end
+
+  return 'info'
+end
+
 local function notify(message, notifyType)
-  lib.notify({
+  local normalizedType = normalizeNotifyType(notifyType)
+  local payload = {
+    type = normalizedType,
     title = 'MZ Target',
-    description = tostring(message or 'Acao concluida.'),
-    type = notifyType or 'inform'
-  })
+    message = tostring(message or 'Acao concluida.'),
+    duration = 5000
+  }
+
+  if GetResourceState('mz_notify') == 'started' then
+    exports['mz_notify']:Notify(payload)
+    return
+  end
+
+  if lib and type(lib.notify) == 'function' then
+    lib.notify({
+      title = payload.title,
+      description = payload.message,
+      type = normalizedType == 'info' and 'inform' or normalizedType
+    })
+    return
+  end
+
+  print(('[mz_target][%s] %s - %s'):format(payload.type, payload.title, payload.message))
 end
 
 local function normalizePlate(plate)
@@ -659,6 +691,58 @@ local function resolveVehicleSectionTarget(vehicle, plate, playerCoords, section
   return bestTarget
 end
 
+local function buildVehicleRegionTarget(vehicle, plate, playerCoords, sectionName, label, hitPoint)
+  if not raycastCoords then
+    return nil
+  end
+
+  local model = GetEntityModel(vehicle)
+  local minDim, maxDim = GetModelDimensions(model)
+  local localHit = GetOffsetFromEntityGivenWorldCoords(
+    vehicle,
+    tonumber(hitPoint.x) or 0,
+    tonumber(hitPoint.y) or 0,
+    tonumber(hitPoint.z) or 0
+  )
+
+  local localX = tonumber(localHit.x) or 0
+  local localY = tonumber(localHit.y) or 0
+  local widthHalf = math.max(math.abs(tonumber(maxDim.x) or 0), math.abs(tonumber(minDim.x) or 0), 0.8)
+  local rearLimit = (tonumber(minDim.y) or -2.0) + 0.95
+  local frontDoorStart = -0.15
+  local frontDoorEnd = (tonumber(maxDim.y) or 2.0) * 0.78
+  local sideThreshold = math.max(widthHalf * 0.42, 0.48)
+  local centerThreshold = math.max(widthHalf * 0.95, 0.9)
+
+  if sectionName == 'trunk' then
+    if localY > rearLimit or math.abs(localX) > centerThreshold then
+      return nil
+    end
+  elseif sectionName == 'glovebox' then
+    if localY < frontDoorStart or localY > frontDoorEnd or math.abs(localX) > centerThreshold then
+      return nil
+    end
+
+    if math.abs(localX) < sideThreshold then
+      return nil
+    end
+  else
+    return nil
+  end
+
+  return {
+    type = sectionName,
+    label = tostring(label or 'Interagir'),
+    hint = ('%s para abrir menu'):format(MENU_LABEL),
+    plate = plate,
+    entity = vehicle,
+    point = hitPoint,
+    distance = getDistance(playerCoords, hitPoint),
+    screen_distance = 0.0,
+    source = 'raycast_region'
+  }
+end
+
 local function resolveVehicleTarget(vehicle, playerCoords, raycastCoords, isRaycastVehicle)
   if not DoesEntityExist(vehicle) then
     return nil
@@ -667,6 +751,33 @@ local function resolveVehicleTarget(vehicle, playerCoords, raycastCoords, isRayc
   local plate = normalizePlate(GetVehicleNumberPlateText(vehicle))
   if not plate then
     return nil
+  end
+
+  if isRaycastVehicle == true and raycastCoords then
+    local regionCandidates = {
+      buildVehicleRegionTarget(
+        vehicle,
+        plate,
+        playerCoords,
+        'trunk',
+        MZTargetConfig.vehicle and MZTargetConfig.vehicle.trunk and MZTargetConfig.vehicle.trunk.label or 'Abrir porta-malas',
+        raycastCoords
+      ),
+      buildVehicleRegionTarget(
+        vehicle,
+        plate,
+        playerCoords,
+        'glovebox',
+        MZTargetConfig.vehicle and MZTargetConfig.vehicle.glovebox and MZTargetConfig.vehicle.glovebox.label or 'Abrir porta-luvas',
+        raycastCoords
+      )
+    }
+
+    for _, candidate in ipairs(regionCandidates) do
+      if candidate then
+        return candidate
+      end
+    end
   end
 
   local candidates = {
