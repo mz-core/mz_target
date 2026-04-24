@@ -1,0 +1,245 @@
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  font-family: "Exo 2", "Trebuchet MS", "Segoe UI", sans-serif;
+}
+
+body {
+  pointer-events: none;
+}
+
+body.menu-open {
+  pointer-events: auto;
+}
+
+.is-hidden {
+  display: none !important;
+}
+
+#target-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.target-eye {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  color: rgba(245, 245, 245, 0.92);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+  transition:
+    color 120ms ease,
+    transform 120ms ease,
+    filter 120ms ease;
+}
+
+.target-eye svg {
+  width: 26px;
+  height: 26px;
+}
+
+.target-eye.is-active {
+  transform: translate(-50%, -50%) scale(1.08);
+  filter: drop-shadow(0 0 10px rgba(93, 241, 170, 0.3));
+}
+
+.target-eye.kind-default {
+  color: rgba(245, 245, 245, 0.92);
+}
+
+.target-eye.kind-drop {
+  color: #f7d46d;
+}
+
+.target-eye.kind-trunk {
+  color: #5df1aa;
+}
+
+.target-eye.kind-glovebox {
+  color: #6ed8ff;
+}
+
+.target-status-card {
+  position: absolute;
+  left: 72px;
+  top: -20px;
+  min-width: 220px;
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(180deg, rgba(23, 27, 31, 0.96), rgba(15, 18, 20, 0.92));
+  color: rgba(245, 245, 245, 0.96);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.34);
+}
+
+.target-status-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.target-status-hint {
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.target-menu {
+  position: absolute;
+  left: 96px;
+  top: -8px;
+  width: 280px;
+  padding: 0.85rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  background:
+    linear-gradient(180deg, rgba(18, 22, 24, 0.98), rgba(12, 14, 16, 0.95));
+  color: rgba(245, 245, 245, 0.96);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+  pointer-events: auto;
+}
+
+.target-menu-header {
+  display: grid;
+  gap: 0.22rem;
+  margin-bottom: 0.75rem;
+}
+
+.target-menu-kicker {
+  font-size: 0.64rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.46);
+}
+
+.target-menu-title {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.target-menu-hint {
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.64);
+}
+
+.target-options {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.target-option {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    border-color 120ms ease,
+    background 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.target-option:hover,
+.target-option:focus-visible {
+  outline: none;
+  transform: translateX(4px);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+}
+
+.target-option.kind-drop:hover,
+.target-option.kind-drop:focus-visible {
+  border-color: rgba(247, 212, 109, 0.42);
+}
+
+.target-option.kind-trunk:hover,
+.target-option.kind-trunk:focus-visible {
+  border-color: rgba(93, 241, 170, 0.42);
+}
+
+.target-option.kind-glovebox:hover,
+.target-option.kind-glovebox:focus-visible {
+  border-color: rgba(110, 216, 255, 0.42);
+}
+
+.target-option-badge {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.target-option.kind-drop .target-option-badge {
+  color: #f7d46d;
+}
+
+.target-option.kind-trunk .target-option-badge {
+  color: #5df1aa;
+}
+
+.target-option.kind-glovebox .target-option-badge {
+  color: #6ed8ff;
+}
+
+.target-option-copy {
+  min-width: 0;
+  display: grid;
+  gap: 0.14rem;
+}
+
+.target-option-label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.target-option-description {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.target-menu-footer {
+  margin-top: 0.78rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.46);
+}
