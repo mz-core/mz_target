@@ -260,6 +260,22 @@ local function disableTargetCombatControls()
   end
 end
 
+local function isMzVehiclesStarted()
+  return GetResourceState('mz_vehicles') == 'started'
+end
+
+local function isPlayerInVehicleTrunk()
+  if not isMzVehiclesStarted() then
+    return false
+  end
+
+  local ok, inTrunk = pcall(function()
+    return exports['mz_vehicles']:IsInVehicleTrunk()
+  end)
+
+  return ok == true and inTrunk == true
+end
+
 local function buildTargetMenuOptions(target)
   if type(target) ~= 'table' then
     return {}
@@ -277,7 +293,7 @@ local function buildTargetMenuOptions(target)
   end
 
   if target.type == 'trunk' then
-    return {
+    local options = {
       {
         id = 'open_trunk',
         kind = 'trunk',
@@ -285,6 +301,26 @@ local function buildTargetMenuOptions(target)
         description = 'Abrir o inventario do porta-malas.'
       }
     }
+
+    if isMzVehiclesStarted() then
+      if isPlayerInVehicleTrunk() then
+        options[#options + 1] = {
+          id = 'exit_trunk',
+          kind = 'trunk',
+          label = 'Sair do porta-malas',
+          description = 'Sair fisicamente do porta-malas.'
+        }
+      else
+        options[#options + 1] = {
+          id = 'enter_trunk',
+          kind = 'trunk',
+          label = 'Entrar no porta-malas',
+          description = 'Entrar fisicamente no porta-malas.'
+        }
+      end
+    end
+
+    return options
   end
 
   if target.type == 'glovebox' then
@@ -952,6 +988,24 @@ local function activateTarget(target, optionId)
     return openInventoryView(function()
       return exports['mz_inventory']:OpenVehicleTrunkView(target.plate)
     end)
+  end
+
+  if target.type == 'trunk' and optionId == 'enter_trunk' then
+    if not isMzVehiclesStarted() then
+      return false
+    end
+
+    TriggerEvent('mz_vehicles:client:enterVehicleTrunk', { entity = target.entity })
+    return true
+  end
+
+  if target.type == 'trunk' and optionId == 'exit_trunk' then
+    if not isMzVehiclesStarted() then
+      return false
+    end
+
+    TriggerEvent('mz_vehicles:client:exitVehicleTrunk')
+    return true
   end
 
   if target.type == 'glovebox' and (optionId == '' or optionId == 'open_glovebox') then
