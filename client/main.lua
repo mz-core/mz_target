@@ -12,6 +12,12 @@ if MENU_LABEL == '' then
   MENU_LABEL = 'Botao direito'
 end
 
+local PRIMARY_CONTROL = tonumber(MZTargetConfig.primary_control) or 24
+local PRIMARY_LABEL = tostring(MZTargetConfig.primary_label or ''):gsub('^%s+', ''):gsub('%s+$', '')
+if PRIMARY_LABEL == '' then
+  PRIMARY_LABEL = 'Clique esquerdo'
+end
+
 local DROP_MODEL_HASH = joaat((MZTargetConfig.drop and MZTargetConfig.drop.prop_model) or 'prop_cs_heist_bag_02')
 
 local ActiveTarget = nil
@@ -236,7 +242,7 @@ local function setOverlayMode(mode, target)
     target = {
       kind = tostring(target and target.type or 'default'),
       label = tostring(target and target.label or 'Interagir'),
-      hint = tostring(target and target.hint or ('%s para abrir menu'):format(MENU_LABEL))
+      hint = tostring(target and target.hint or ('%s para usar | %s para menu'):format(PRIMARY_LABEL, MENU_LABEL))
     }
   })
 end
@@ -704,7 +710,7 @@ local function resolveVehicleSectionTarget(vehicle, plate, playerCoords, section
       local targetData = {
         type = sectionName,
         label = tostring(sectionConfig.label or 'Interagir'),
-        hint = ('%s para abrir menu'):format(MENU_LABEL),
+        hint = ('%s para usar | %s para menu'):format(PRIMARY_LABEL, MENU_LABEL),
         plate = plate,
         entity = vehicle,
         point = candidate.point,
@@ -728,7 +734,7 @@ local function resolveVehicleSectionTarget(vehicle, plate, playerCoords, section
 end
 
 local function buildVehicleRegionTarget(vehicle, plate, playerCoords, sectionName, label, hitPoint)
-  if not raycastCoords then
+  if not hitPoint then
     return nil
   end
 
@@ -769,7 +775,7 @@ local function buildVehicleRegionTarget(vehicle, plate, playerCoords, sectionNam
   return {
     type = sectionName,
     label = tostring(label or 'Interagir'),
-    hint = ('%s para abrir menu'):format(MENU_LABEL),
+    hint = ('%s para usar | %s para menu'):format(PRIMARY_LABEL, MENU_LABEL),
     plate = plate,
     entity = vehicle,
     point = hitPoint,
@@ -865,7 +871,7 @@ local function resolveDropTarget(entry, playerCoords, isRaycastHit)
   return {
     type = 'drop',
     label = tostring(MZTargetConfig.drop and MZTargetConfig.drop.label or 'Abrir drop'),
-    hint = ('%s para abrir menu'):format(MENU_LABEL),
+    hint = ('%s para usar | %s para menu'):format(PRIMARY_LABEL, MENU_LABEL),
     drop_uid = entry.drop_uid,
     entity = entry.entity,
     point = aimPoint,
@@ -1164,7 +1170,11 @@ CreateThread(function()
         else
           setOverlayMode('found', target)
 
-          if IsDisabledControlJustPressed(0, MENU_CONTROL) then
+          if IsDisabledControlJustPressed(0, PRIMARY_CONTROL) then
+            if activateTarget(target, '') then
+              stopTargetMode()
+            end
+          elseif IsDisabledControlJustPressed(0, MENU_CONTROL) then
             openTargetMenu(target)
           end
         end
