@@ -3,7 +3,7 @@ game 'gta5'
 lua54 'yes'
 
 name 'mz_target'
-author 'mz-core'
+author 'Mazus'
 description 'Target interaction layer for mz_core and mz_inventory'
 version '0.2.0'
 
