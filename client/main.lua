@@ -270,6 +270,14 @@ local function isMzVehiclesStarted()
   return GetResourceState('mz_vehicles') == 'started'
 end
 
+local function localVehicleActionAllowed()
+  if GetResourceState('mz_core') ~= 'started' then return false end
+  local ok, allowed = pcall(function()
+    return exports['mz_core']:CanLocalPlayerPerformAction('vehicle.enter')
+  end)
+  return ok == true and allowed == true
+end
+
 local function isPlayerInVehicleTrunk()
   if not isMzVehiclesStarted() then
     return false
@@ -316,7 +324,7 @@ local function buildTargetMenuOptions(target)
           label = 'Sair do porta-malas',
           description = 'Sair fisicamente do porta-malas.'
         }
-      else
+      elseif localVehicleActionAllowed() then
         options[#options + 1] = {
           id = 'enter_trunk',
           kind = 'trunk',
@@ -997,7 +1005,7 @@ local function activateTarget(target, optionId)
   end
 
   if target.type == 'trunk' and optionId == 'enter_trunk' then
-    if not isMzVehiclesStarted() then
+    if not isMzVehiclesStarted() or not localVehicleActionAllowed() then
       return false
     end
 
