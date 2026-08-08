@@ -270,6 +270,22 @@ local function isMzVehiclesStarted()
   return GetResourceState('mz_vehicles') == 'started'
 end
 
+local function isMzInventoryStarted()
+  return GetResourceState('mz_inventory') == 'started'
+end
+
+local function isInventoryOpen()
+  if not isMzInventoryStarted() then
+    return false
+  end
+
+  local ok, result = pcall(function()
+    return exports['mz_inventory']:IsOpen()
+  end)
+
+  return ok == true and result == true
+end
+
 local function localVehicleActionAllowed()
   if GetResourceState('mz_core') ~= 'started' then return false end
   local ok, allowed = pcall(function()
@@ -973,7 +989,17 @@ local function resolveCurrentTarget()
 end
 
 local function openInventoryView(callback)
-  local ok, resultOrErr = callback()
+  if not isMzInventoryStarted() then
+    notify('Inventario indisponivel enquanto o recurso reinicia.', 'error')
+    return false
+  end
+
+  local callOk, ok, resultOrErr = pcall(callback)
+  if not callOk then
+    notify('Inventario ainda esta inicializando. Tente novamente.', 'error')
+    return false
+  end
+
   if ok == false and type(resultOrErr) == 'table' and trim(resultOrErr.message) ~= '' then
     notify(resultOrErr.message, 'error')
     return false
@@ -1036,7 +1062,7 @@ local function startTargetMode()
     return
   end
 
-  if IsPauseMenuActive() or exports['mz_inventory']:IsOpen() then
+  if IsPauseMenuActive() or isInventoryOpen() then
     return
   end
 
@@ -1162,7 +1188,7 @@ CreateThread(function()
     if not TargetModeActive then
       ActiveTarget = nil
       setOverlayMode('closed')
-    elseif exports['mz_inventory']:IsOpen() or IsPauseMenuActive() then
+    elseif isInventoryOpen() or IsPauseMenuActive() then
       stopTargetMode()
     else
       disableTargetCombatControls()
