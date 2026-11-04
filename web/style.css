@@ -1,245 +1,130 @@
+/* Based on qb-target 5.5.0 html/css/style.css (GPL-3.0).
+   Modified for MZ: local assets only, transparent CEF root, lucide icons. */
+:root {
+  --md-success: #386a20;
+  --md-on-surface: #e6e1e5;
+  --md-surface-container-high: rgba(33, 31, 38, 0.92);
+  --md-surface-container-highest: rgba(54, 52, 59, 0.96);
+  --md-shadow: rgba(0, 0, 0, 0.35);
+  --md-radius-small: 8px;
+  --md-typescale-label-medium-size: 13px;
+  --font-primary: "Segoe UI", "Inter", system-ui, Arial, sans-serif;
+  --font-weight-medium: 500;
+}
+
 html,
 body {
-  margin: 0;
   width: 100%;
   height: 100%;
+  margin: 0;
+  padding: 0;
   overflow: hidden;
   background: transparent;
-  font-family: "Exo 2", "Trebuchet MS", "Segoe UI", sans-serif;
-}
-
-body {
-  pointer-events: none;
-}
-
-body.menu-open {
-  pointer-events: auto;
-}
-
-.is-hidden {
-  display: none !important;
+  font-family: var(--font-primary);
+  user-select: none;
 }
 
 #target-wrapper {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  transform: translate(-50%, -50%);
+  position: fixed;
+  inset: 0;
+  display: none;
   pointer-events: none;
 }
 
-.target-eye {
+#target-eye {
   position: absolute;
-  left: 0;
-  top: 0;
-  width: 38px;
-  height: 38px;
-  display: grid;
-  place-items: center;
+  top: 50%;
+  left: 50%;
+  display: none;
+  width: 28px;
+  height: 28px;
   transform: translate(-50%, -50%);
-  border-radius: 999px;
-  color: rgba(245, 245, 245, 0.92);
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
-  transition:
-    color 120ms ease,
-    transform 120ms ease,
-    filter 120ms ease;
+  color: var(--md-on-surface);
+  filter: drop-shadow(0 2px 4px var(--md-shadow));
+  transition: color 0.2s ease;
 }
 
-.target-eye svg {
-  width: 26px;
-  height: 26px;
+#target-eye svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
-.target-eye.is-active {
-  transform: translate(-50%, -50%) scale(1.08);
-  filter: drop-shadow(0 0 10px rgba(93, 241, 170, 0.3));
+#target-eye.target-success {
+  color: var(--md-success);
 }
 
-.target-eye.kind-default {
-  color: rgba(245, 245, 245, 0.92);
-}
-
-.target-eye.kind-drop {
-  color: #f7d46d;
-}
-
-.target-eye.kind-trunk {
-  color: #5df1aa;
-}
-
-.target-eye.kind-glovebox {
-  color: #6ed8ff;
-}
-
-.target-status-card {
+#target-hint {
   position: absolute;
-  left: 72px;
-  top: -20px;
-  min-width: 220px;
-  display: grid;
-  gap: 0.18rem;
-  padding: 0.55rem 0.75rem;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background:
-    linear-gradient(180deg, rgba(23, 27, 31, 0.96), rgba(15, 18, 20, 0.92));
-  color: rgba(245, 245, 245, 0.96);
-  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.34);
+  top: calc(50% + 24px);
+  left: 50%;
+  display: none;
+  max-width: 360px;
+  transform: translateX(-50%);
+  padding: 4px 10px;
+  border-radius: var(--md-radius-small);
+  background: rgba(15, 15, 18, 0.55);
+  color: var(--md-on-surface);
+  font-size: 12px;
+  font-weight: 400;
+  text-align: center;
+  text-shadow: 0 2px 4px var(--md-shadow);
+  white-space: nowrap;
 }
 
-.target-status-label {
-  font-size: 0.9rem;
-  font-weight: 700;
-  line-height: 1.1;
-}
-
-.target-status-hint {
-  font-size: 0.68rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.62);
-}
-
-.target-menu {
+#target-label-wrapper {
   position: absolute;
-  left: 96px;
-  top: -8px;
-  width: 280px;
-  padding: 0.85rem;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.13);
-  background:
-    linear-gradient(180deg, rgba(18, 22, 24, 0.98), rgba(12, 14, 16, 0.95));
-  color: rgba(245, 245, 245, 0.96);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+  top: 50%;
+  left: calc(50% + 36px);
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  max-height: 70vh;
+  overflow: hidden;
+}
+
+#target-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  list-style: none;
+  font-size: var(--md-typescale-label-medium-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--md-on-surface);
+  white-space: nowrap;
+  text-shadow: 0 2px 4px var(--md-shadow);
   pointer-events: auto;
 }
 
-.target-menu-header {
-  display: grid;
-  gap: 0.22rem;
-  margin-bottom: 0.75rem;
-}
-
-.target-menu-kicker {
-  font-size: 0.64rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.46);
-}
-
-.target-menu-title {
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1.15;
-}
-
-.target-menu-hint {
-  font-size: 0.74rem;
-  color: rgba(255, 255, 255, 0.64);
-}
-
-.target-options {
-  display: grid;
-  gap: 0.55rem;
-}
-
-.target-option {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 42px minmax(0, 1fr);
-  align-items: center;
-  gap: 0.7rem;
-  padding: 0.7rem 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.04);
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition:
-    transform 120ms ease,
-    border-color 120ms ease,
-    background 120ms ease,
-    box-shadow 120ms ease;
-}
-
-.target-option:hover,
-.target-option:focus-visible {
-  outline: none;
-  transform: translateX(4px);
-  border-color: rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
-}
-
-.target-option.kind-drop:hover,
-.target-option.kind-drop:focus-visible {
-  border-color: rgba(247, 212, 109, 0.42);
-}
-
-.target-option.kind-trunk:hover,
-.target-option.kind-trunk:focus-visible {
-  border-color: rgba(93, 241, 170, 0.42);
-}
-
-.target-option.kind-glovebox:hover,
-.target-option.kind-glovebox:focus-visible {
-  border-color: rgba(110, 216, 255, 0.42);
-}
-
-.target-option-badge {
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.06);
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.target-option.kind-drop .target-option-badge {
-  color: #f7d46d;
-}
-
-.target-option.kind-trunk .target-option-badge {
-  color: #5df1aa;
-}
-
-.target-option.kind-glovebox .target-option-badge {
-  color: #6ed8ff;
-}
-
-.target-option-copy {
-  min-width: 0;
-  display: grid;
-  gap: 0.14rem;
-}
-
-.target-option-label {
-  font-size: 0.88rem;
-  font-weight: 700;
-  line-height: 1.1;
-}
-
-.target-option-description {
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.target-menu-footer {
-  margin-top: 0.78rem;
+[id^="target-option-"] {
   display: flex;
-  justify-content: space-between;
-  gap: 0.75rem;
-  font-size: 0.64rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.46);
+  align-items: center;
+  gap: 2px;
+  padding: 6px 9px;
+  border-radius: 4px;
+  background: var(--md-surface-container-high);
+  box-shadow: 0 1px 3px 1px var(--md-shadow);
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+[id^="target-option-"]:hover {
+  background: var(--md-surface-container-highest);
+  transform: translateX(6px);
+}
+
+[id^="target-icon-"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+}
+
+[id^="target-icon-"] svg {
+  width: 14px;
+  height: 14px;
+}
+
+.target-success {
+  color: var(--md-success) !important;
 }

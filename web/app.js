@@ -1,214 +1,160 @@
-const wrapper = document.getElementById("target-wrapper");
-const eye = document.getElementById("target-eye");
-const statusCard = document.getElementById("target-status-card");
-const statusLabel = document.getElementById("target-status-label");
-const statusHint = document.getElementById("target-status-hint");
-const menu = document.getElementById("target-menu");
-const menuTitle = document.getElementById("target-menu-title");
-const menuHint = document.getElementById("target-menu-hint");
-const optionsRoot = document.getElementById("target-options");
-const optionTemplate = document.getElementById("target-option-template");
+/* Based on qb-target 5.5.0 html/js/app.js (GPL-3.0).
+   Modified for MZ: local lucide icons, no FontAwesome CDN, localized hint. */
+document.addEventListener("DOMContentLoaded", function () {
+  const targetWrapper = document.getElementById("target-wrapper");
+  const targetEye = document.getElementById("target-eye");
+  const targetHint = document.getElementById("target-hint");
+  const targetLabel = document.getElementById("target-label");
 
-const menuState = {
-  open: false,
-};
-
-function resetEye(kind = "default") {
-  eye.className = `target-eye kind-${kind}`;
-}
-
-function openTarget() {
-  wrapper.classList.remove("is-hidden");
-  wrapper.setAttribute("aria-hidden", "false");
-  statusCard.classList.add("is-hidden");
-  menu.classList.add("is-hidden");
-  menu.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("menu-open");
-  menuState.open = false;
-  optionsRoot.innerHTML = "";
-  resetEye("default");
-}
-
-function closeTarget() {
-  wrapper.classList.add("is-hidden");
-  wrapper.setAttribute("aria-hidden", "true");
-  statusCard.classList.add("is-hidden");
-  menu.classList.add("is-hidden");
-  menu.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("menu-open");
-  menuState.open = false;
-  optionsRoot.innerHTML = "";
-  statusLabel.textContent = "";
-  statusHint.textContent = "";
-  menuTitle.textContent = "";
-  menuHint.textContent = "";
-  resetEye("default");
-}
-
-function foundTarget(target) {
-  const kind = String((target && target.kind) || "default").trim() || "default";
-  resetEye(kind);
-  eye.classList.add("is-active");
-  statusLabel.textContent = String((target && target.label) || "Interagir");
-  statusHint.textContent = String(
-    (target && target.hint) || "Botao direito para abrir menu",
-  );
-  statusCard.classList.remove("is-hidden");
-  menu.classList.add("is-hidden");
-  menu.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("menu-open");
-  menuState.open = false;
-  optionsRoot.innerHTML = "";
-}
-
-function leftTarget() {
-  statusCard.classList.add("is-hidden");
-  menu.classList.add("is-hidden");
-  menu.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("menu-open");
-  menuState.open = false;
-  optionsRoot.innerHTML = "";
-  resetEye("default");
-}
-
-function getOptionBadge(kind) {
-  switch (String(kind || "").trim()) {
-    case "drop":
-      return "DROP";
-    case "trunk":
-      return "TRK";
-    case "glovebox":
-      return "BOX";
-    default:
-      return "USE";
+  function normalizeIconName(name) {
+    if (typeof name !== "string") return "";
+    return name
+      .trim()
+      .replace(/_/g, "-")
+      .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+      .toLowerCase();
   }
-}
 
-function createTargetOption(option) {
-  const fragment = optionTemplate.content.cloneNode(true);
-  const button = fragment.querySelector(".target-option");
-  const badge = fragment.querySelector(".target-option-badge");
-  const label = fragment.querySelector(".target-option-label");
-  const description = fragment.querySelector(".target-option-description");
-  const optionId = String(
-    (option && (option.id || option.option_id || option.optionId)) || "",
-  ).trim();
-  const kind = String((option && option.kind) || "default").trim() || "default";
+  function toLucideKey(name) {
+    const normalized = normalizeIconName(name);
+    if (!normalized) return "";
+    return normalized
+      .split("-")
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join("");
+  }
 
-  button.dataset.optionId = optionId;
-  button.classList.add(`kind-${kind}`);
-  badge.textContent = getOptionBadge(kind);
-  label.textContent = String((option && option.label) || "Interagir");
-  description.textContent = String(
-    (option && option.description) || "Executar esta acao.",
-  );
+  function hasLucideIcon(name) {
+    const key = toLucideKey(name);
+    return Boolean(key && window.lucide?.icons?.[key]);
+  }
 
-  return fragment;
-}
+  function applyLucideIcons() {
+    if (!window.lucide?.createIcons || !window.lucide?.icons) return;
+    window.lucide.createIcons({ icons: window.lucide.icons, root: targetLabel });
+  }
 
-function validTarget(payload) {
-  const target = payload && payload.target ? payload.target : {};
-  const kind = String(target.kind || "default").trim() || "default";
-  const options = Array.isArray(payload && payload.options) ? payload.options : [];
+  function OpenTarget(hint) {
+    targetWrapper.style.display = "block";
+    targetEye.style.display = "block";
+    targetEye.classList.remove("target-success");
+    targetLabel.textContent = "";
+    targetHint.textContent = typeof hint === "string" ? hint : "";
+    targetHint.style.display = targetHint.textContent ? "block" : "none";
+  }
 
-  resetEye(kind);
-  eye.classList.add("is-active");
-  statusCard.classList.add("is-hidden");
-  menuTitle.textContent = String(target.label || "Interagir");
-  menuHint.textContent = String(
-    target.hint || "Mouse liberado. Escolha uma opcao.",
-  );
-  optionsRoot.innerHTML = "";
+  function CloseTarget() {
+    targetWrapper.style.display = "none";
+    targetEye.style.display = "none";
+    targetEye.classList.remove("target-success");
+    targetLabel.textContent = "";
+    targetHint.textContent = "";
+    targetHint.style.display = "none";
+  }
 
-  options.forEach((option) => {
-    optionsRoot.appendChild(createTargetOption(option));
-  });
+  function createTargetOption(index, itemData) {
+    if (itemData === null || itemData === undefined) return;
 
-  menu.classList.remove("is-hidden");
-  menu.setAttribute("aria-hidden", "false");
-  document.body.classList.add("menu-open");
-  menuState.open = true;
-}
+    index = Number(index) + 1;
+    const targetOption = document.createElement("div");
+    targetOption.id = `target-option-${index}`;
 
-async function postNui(route, payload = {}) {
-  try {
-    await fetch(`https://${GetParentResourceName()}/${route}`, {
+    const iconName = normalizeIconName(itemData.icon);
+    if (iconName && hasLucideIcon(iconName)) {
+      const targetIcon = document.createElement("span");
+      targetIcon.id = `target-icon-${index}`;
+      const icon = document.createElement("i");
+      icon.setAttribute("data-lucide", iconName);
+      icon.setAttribute("aria-hidden", "true");
+      targetIcon.appendChild(icon);
+      targetOption.appendChild(targetIcon);
+    }
+
+    targetOption.appendChild(document.createTextNode(String(itemData.label || "")));
+    targetLabel.appendChild(targetOption);
+  }
+
+  function FoundTarget(item) {
+    targetEye.classList.add("target-success");
+    targetHint.style.display = "none";
+    targetLabel.textContent = "";
+    for (let [index, itemData] of Object.entries(item.options || {})) {
+      createTargetOption(index, itemData);
+    }
+    applyLucideIcons();
+  }
+
+  function ValidTarget(item) {
+    targetHint.style.display = "none";
+    targetLabel.textContent = "";
+    for (let [index, itemData] of Object.entries(item.data || {})) {
+      createTargetOption(index, itemData);
+    }
+    applyLucideIcons();
+  }
+
+  function LeftTarget() {
+    targetEye.classList.remove("target-success");
+    targetLabel.textContent = "";
+    targetHint.style.display = "none";
+  }
+
+  function post(route, payload) {
+    fetch(`https://${GetParentResourceName()}/${route}`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json; charset=UTF-8",
-      },
-      body: JSON.stringify(payload),
-    });
-  } catch (error) {
-    console.error(`[mz_target/ui] failed to post ${route}`, error);
-  }
-}
-
-optionsRoot.addEventListener("click", (event) => {
-  const button = event.target.closest(".target-option");
-  if (!button) {
-    return;
+      headers: { "Content-Type": "application/json; charset=UTF-8" },
+      body: payload === undefined ? "" : JSON.stringify(payload),
+    }).catch((error) => console.error(`[mz_target/ui] ${route}`, error));
   }
 
-  const optionId = String(button.dataset.optionId || "").trim();
-  if (!optionId) {
-    return;
+  function handleMouseDown(event) {
+    const option = event.target.closest?.('[id^="target-option-"]');
+    if (option && event.button === 0) {
+      const parts = option.id.split("-");
+      post("selectTarget", parts[2]);
+      targetLabel.textContent = "";
+      return;
+    }
+
+    if (event.button === 2) {
+      event.preventDefault();
+      LeftTarget();
+      post("leftTarget");
+    }
   }
 
-  void postNui("selectTarget", {
-    option_id: optionId,
+  function handleKeyDown(event) {
+    if (event.key === "Escape" || event.key === "Backspace") {
+      CloseTarget();
+      post("closeTarget");
+    }
+  }
+
+  window.addEventListener("message", function (event) {
+    const payload = event.data || {};
+    switch (payload.response) {
+      case "openTarget":
+        OpenTarget(payload.hint);
+        break;
+      case "closeTarget":
+        CloseTarget();
+        break;
+      case "foundTarget":
+        FoundTarget(payload);
+        break;
+      case "validTarget":
+        ValidTarget(payload);
+        break;
+      case "leftTarget":
+        LeftTarget();
+        break;
+    }
   });
+
+  window.addEventListener("mousedown", handleMouseDown);
+  window.addEventListener("keydown", handleKeyDown);
+  window.addEventListener("contextmenu", (event) => event.preventDefault());
+
+  CloseTarget();
 });
-
-window.addEventListener("contextmenu", (event) => {
-  if (menuState.open !== true) {
-    return;
-  }
-
-  event.preventDefault();
-});
-
-window.addEventListener("mousedown", (event) => {
-  if (menuState.open !== true) {
-    return;
-  }
-
-  if (event.button === 2) {
-    event.preventDefault();
-    void postNui("leftTarget");
-  }
-});
-
-window.addEventListener("keydown", (event) => {
-  if (event.key !== "Escape" && event.key !== "Backspace") {
-    return;
-  }
-
-  void postNui("closeTarget");
-});
-
-window.addEventListener("message", (event) => {
-  const payload = event.data || {};
-
-  switch (payload.action) {
-    case "openTarget":
-      openTarget();
-      break;
-    case "foundTarget":
-      openTarget();
-      foundTarget(payload.target);
-      break;
-    case "validTarget":
-      openTarget();
-      validTarget(payload);
-      break;
-    case "leftTarget":
-      leftTarget();
-      break;
-    case "closeTarget":
-      closeTarget();
-      break;
-  }
-});
-
-closeTarget();
