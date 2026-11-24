@@ -6,7 +6,7 @@ use_experimental_fxv2_oal 'yes'
 name 'mz_target'
 author 'BerkieB / MZ Framework'
 description 'Entity detection and interaction dispatch based on qb-target 5.5.0 (GPL-3.0)'
-version '1.0.0'
+version '1.0.1'
 
 ui_page 'web/index.html'
 

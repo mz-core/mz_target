@@ -5,8 +5,9 @@ local currentResourceName = GetCurrentResourceName()
 local UTF8_BOM = string.char(239, 187, 191)
 
 function Load(name)
-  local file = ('data/%s.lua'):format(name)
-  local chunk = LoadResourceFile(currentResourceName, file)
+  if name ~= 'bones' then error(('[mz_target] bootstrap failed: unknown data %s'):format(tostring(name)), 0) end
+  local file = 'data/bones.lua'
+  local chunk = LoadResourceFile(currentResourceName, 'data/bones.lua')
   if not chunk then
     error(('[mz_target] bootstrap failed: %s not found'):format(file), 0)
   end
