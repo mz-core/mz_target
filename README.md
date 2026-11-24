@@ -66,15 +66,17 @@ daquele owner.
 
 ## Drops do inventário
 
-O `mz_target` apresenta o prop físico dos world drops, mas o `mz_inventory`
-continua dono do `drop_uid`, conteúdo e transferências. O `mz_inventory` usa:
+O `mz_inventory` cria e acompanha o prop físico, além de ser dono do
+`drop_uid`, conteúdo e transferências. Para consultar a entidade:
 
 ```lua
-local dropUid = exports['mz_target']:GetWorldDropByEntity(entity)
+local dropUid = exports['mz_inventory']:GetWorldDropByEntity(entity)
 ```
 
 A export só retorna UID para o prop exato criado para um drop real. Um prop
 parecido do mapa retorna `nil`, então a opção "Abrir bolsa" não aparece.
+As exports equivalentes do `mz_target` permanecem como compatibilidade e
+encaminham a consulta ao inventário.
 
 ## Locales
 

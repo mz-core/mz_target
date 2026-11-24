@@ -35,7 +35,8 @@ local function sanitizeWorldDrop(drop)
     x = tonumber(drop.x) or 0,
     y = tonumber(drop.y) or 0,
     z = tonumber(drop.z) or 0,
-    metadata = cloneTable(metadata)
+    metadata = cloneTable(metadata),
+    prop_model = type(drop.prop_model) == 'string' and drop.prop_model:match('^[%w_]+$') or nil
   }
 end
 
